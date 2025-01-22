@@ -14,7 +14,10 @@ class Employee extends Model
     protected $fillable = [
         'activity_schedule_id',
         'user_id',
-        'crew',
+        'work_as',
+        'work_day',
+        'work_start',
+        'work_end',
         'notes',
     ];
 

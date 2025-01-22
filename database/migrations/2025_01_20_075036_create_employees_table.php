@@ -13,12 +13,17 @@ return new class extends Migration
     {
         Schema::create('employees', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('activity_schedule_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
-            $table->string('crew');
-            $table->text('note')->nullable();
-            $table->softDeletes();
+            $table->unsignedBigInteger('activity_schedule_id');
+            $table->unsignedBigInteger('user_id');
+            $table->string('work_as');
+            $table->enum('work_day', ['senin', 'selasa', 'rabu', 'kamis', 'jumat', 'sabtu', 'minggu'])->default('senin');
+            $table->string('work_start');
+            $table->string('work_end');
+            $table->text('notes')->nullable();
             $table->timestamps();
+
+            $table->foreign('activity_schedule_id')->references('id')->on('activity_schedules')->onDelete('cascade');
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
         });
     }
 

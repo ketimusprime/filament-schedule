@@ -12,6 +12,8 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Filament\Tables\Contracts\HasTable;
+use stdClass;
 
 class ActivityScheduleResource extends Resource
 {
@@ -26,63 +28,64 @@ class ActivityScheduleResource extends Resource
     {
         return $form
             ->schema([
-            Forms\Components\Tabs::make('activity_schedules')
-            ->tabs([
-                Forms\Components\Tabs\Tab::make('Input Jadwal')
-                ->schema([
-                    Forms\Components\DatePicker::make('activity_date')
-                    ->label('Tangga Aktifitas')
-                    ->required(),
-                Forms\Components\TimePicker::make('activity_time')
-                    ->label('Waktu Aktifitas')
-                    ->required(),
-                Forms\Components\TextInput::make('No_OP')
-                    ->label('Number Order'),
-                Forms\Components\Select::make('order')
-                    ->label('Tipe Order')
-                    ->options([
-                        'kerjasama' => 'Kerjasama',
-                        'walkin' => 'Walk-in',
-                        'online' => 'Online',
-                        'reserve' => 'Reserve',
-                ])
-                ->required(),
-                Forms\Components\TextInput::make('customer_name')
-                    ->label('Nama Customer')
-                    ->required(),
-                Forms\Components\TextInput::make('customer_phone')
-                    ->label('Hp Customer')
-                    ->tel()
-                    ->required(),
-                Forms\Components\Select::make('category_id')
-                    ->label('Kategori')
-                    ->relationship('category', 'name')
-                    ->reactive()
-                    ->required(),
-                Forms\Components\Select::make('subcategory_id')
-                    ->label('Sub Kategori')
-                    ->relationship('subcategory', 'name') 
-                    ->reactive()
-                    ->required(),
-                Forms\Components\TextInput::make('package')
-                    ->label('Nama Paket'),
-                Forms\Components\Textarea::make('description')
-                    ->label('Keterangan')
-                    ->nullable(),
-                Forms\Components\Select::make('status')
-                    ->label('Status')
-                    ->options([
-                        'pending' => 'Pending',
-                        'done' => 'Done',
-                        'cancel' => 'Cancel',
-                        'confirmed' => 'Confirmed',
+                Forms\Components\Tabs::make('activity_schedules')
+                ->tabs([
+                    Forms\Components\Tabs\Tab::make('Input Jadwal')
+                    ->schema([
+                        Forms\Components\DatePicker::make('activity_date')
+                        ->label('Tangga Aktifitas')
+                        ->required(),
+                    Forms\Components\TimePicker::make('activity_time')
+                        ->label('Waktu Aktifitas')
+                        ->required(),
+                    Forms\Components\TextInput::make('No_OP')
+                        ->label('Number Order'),
+                    Forms\Components\Select::make('order')
+                        ->label('Tipe Order')
+                        ->options([
+                            'kerjasama' => 'Kerjasama',
+                            'walkin' => 'Walk-in',
+                            'online' => 'Online',
+                            'reserve' => 'Reserve',
                     ])
-                    ->default('pending')
                     ->required(),
-                Forms\Components\Select::make('user_id')
-                    ->relationship('user', 'name')
-                    ->required(),
-                    ]),
+                    Forms\Components\TextInput::make('customer_name')
+                        ->label('Nama Customer')
+                        ->required(),
+                    Forms\Components\TextInput::make('customer_phone')
+                        ->label('Hp Customer')
+                        ->tel()
+                        ->required(),
+                    Forms\Components\Select::make('category_id')
+                        ->label('Kategori')
+                        ->relationship('category', 'name')
+                        ->reactive()
+                        ->required(),
+                    Forms\Components\Select::make('subcategory_id')
+                        ->label('Sub Kategori')
+                        ->relationship('subcategory', 'name') 
+                        ->reactive()
+                        ->required(),
+                    Forms\Components\TextInput::make('package')
+                        ->label('Nama Paket'),
+                    Forms\Components\Textarea::make('description')
+                        ->label('Keterangan')
+                        ->nullable(),
+                    Forms\Components\Select::make('status')
+                        ->label('Status')
+                        ->options([
+                            'pending' => 'Pending',
+                            'done' => 'Done',
+                            'cancel' => 'Cancel',
+                            'confirmed' => 'Confirmed',
+                        ])
+                        ->default('pending')
+                        ->required(),
+                    Forms\Components\Select::make('user_id')
+                        ->relationship('user', 'name')
+                        ->required(),
+                        ])
+                        ->columns(2),
                 Forms\Components\Tabs\Tab::make('Tambahkan Pekerja')
                 ->schema([
                     Forms\Components\Repeater::make('employees')
@@ -99,6 +102,7 @@ class ActivityScheduleResource extends Resource
                         ->label('Keterangan')
                         ->nullable(),
                         ])
+                        ->columns(2)
             ]),
     ])->columnSpan('2')
             ]);
@@ -108,6 +112,16 @@ class ActivityScheduleResource extends Resource
     {
         return $table
             ->columns([
+                Tables\Columns\TextColumn::make('No')->state(
+                    static function (HasTable $livewire, stdClass $rowLoop): string {
+                        return (string) (
+                            $rowLoop->iteration +
+                            ($livewire->getTableRecordsPerPage() * (
+                                $livewire->getTablePage() - 1
+                            ))
+                        );
+                    }
+                ),
                 Tables\Columns\TextColumn::make('activity_date')->label('Tanggal')->date()->sortable(),
                 Tables\Columns\TextColumn::make('activity_time')->label('Waktu')->time()->sortable(),
                 Tables\Columns\TextColumn::make('No_OP')->label('Number Order')->sortable()->searchable()->toggleable(isToggledHiddenByDefault: true),
@@ -162,26 +176,6 @@ class ActivityScheduleResource extends Resource
         ];
     }
 
-    public static function afterSave(Form $form, $record)
-    {
-        // Ambil data dari form pekerja
-        $employees = $form->getState()['employees'] ?? [];
-
-        dd($employees);
-
-        // Sinkronkan pekerja dengan jadwal aktivitas (menggunakan tabel pivot)
-        if ($employees) {
-            $record->employees()->sync(
-                collect($employees)->mapWithKeys(function ($item) {
-                    return [
-                        $item['user_id'] => [
-                            'crew' => $item['crew'],
-                            'notes' => $item['notes'],
-                        ]
-                    ];
-                })->toArray()
-            );
-        }
-    }
+    
 }
 
