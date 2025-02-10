@@ -11,18 +11,17 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('employees', function (Blueprint $table) {
+        Schema::create('master_employees', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('activity_schedule_id');
             $table->unsignedBigInteger('user_id');
             $table->string('work_as');
-            $table->enum('work_day', ['senin', 'selasa', 'rabu', 'kamis', 'jumat', 'sabtu', 'minggu'])->default('senin');
+            $table->json('work_day');
             $table->string('work_start');
             $table->string('work_end');
             $table->text('notes')->nullable();
+            $table->softDeletes();
             $table->timestamps();
 
-            $table->foreign('activity_schedule_id')->references('id')->on('activity_schedules')->onDelete('cascade');
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
         });
     }
@@ -32,6 +31,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('employees');
+        Schema::dropIfExists('master_employees');
     }
 };

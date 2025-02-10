@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class ActivitySchedule extends Model
@@ -27,24 +28,24 @@ class ActivitySchedule extends Model
 
     public function category()
     {
-        return $this->belongsTo(Category::class);
+        return $this->belongsTo(Category::class, 'category_id');
     }
 
     public function subcategory()
     {
-        return $this->belongsTo(SubCategory::class);
+        return $this->belongsTo(SubCategory::class, 'subcategory_id');
     }
 
     public function user()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'user_id');
     }
 
-    public function employees()
+    public function MasterEmployees(): HasMany
     {
-        return $this->belongsToMany(User::class, 'activity_schedule_employee', 'activity_schedule_id', 'user_id')
-        ->using(ActivityScheduleEmployee::class)
-        ->withPivot('crew', 'notes');
+        return $this->hasMany(MasterEmployee::class);
     }
+
+   
     
 }

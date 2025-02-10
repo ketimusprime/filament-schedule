@@ -4,15 +4,14 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Testing\Fluent\Concerns\Has;
 
-class Employee extends Model
+class MasterEmployee extends Model
 {
     use HasFactory, SoftDeletes;
-
+    
     protected $fillable = [
-        'activity_schedule_id',
         'user_id',
         'work_as',
         'work_day',
@@ -21,13 +20,12 @@ class Employee extends Model
         'notes',
     ];
 
-    public function user()
-    {
-        return $this->belongsTo(User::class);
-    }
+    protected $casts = [
+        'work_day' => 'array',  // Menyimpan work_day sebagai array JSON
+    ];
 
-    public function activitySchedules()
+    public function user() : BelongsTo
     {
-        return $this->hasMany(ActivitySchedule::class);
+        return $this->belongsTo(User::class, 'user_id');
     }
 }

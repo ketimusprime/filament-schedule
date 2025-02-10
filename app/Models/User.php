@@ -4,6 +4,7 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
@@ -46,10 +47,8 @@ class User extends Authenticatable
         ];
     }
 
-    public function activitySchedules()
+    public function MasterEmployees(): HasMany
     {
-        return $this->belongsToMany(ActivitySchedule::class, 'activity_schedule_employee', 'user_id', 'activity_schedule_id')
-                ->using(ActivityScheduleEmployee::class)
-                ->withPivot('crew', 'notes');
+        return $this->hasMany(MasterEmployee::class);
     }
 }

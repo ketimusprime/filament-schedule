@@ -21,7 +21,7 @@ class SubCategoryResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-group';
 
-    protected static ?string $navigationGroup = 'Categories Management';
+    protected static ?string $navigationGroup = 'Master Management';
     protected static ?string $pluralLabel = 'Sub Kategori';
     protected static ?string $label = 'Sub Kategori';
 
